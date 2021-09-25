@@ -1,6 +1,6 @@
 <template>
-   <div class="text-center">
-      Home Page
+   <div class="font-quicksand">
+      <router-view/>
    </div>
 </template>
 
