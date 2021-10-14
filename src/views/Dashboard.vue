@@ -24,7 +24,8 @@
       </ul>
    </div>
    <div class="flex-shrink-0 p-2 max-h-60 hidden lg:flex xl:items-center justify-center card-wrapper-general-theme">
-      <PieCart class="w-52 max-h-60"/>
+      <!-- <PieCart class="w-52 max-h-60"/> -->
+      <div class="w-52"></div>
    </div>
   </div>
   <div class="flex flex-col sm:space-x-4 space-y-6 sm:space-y-0 sm:flex-row w-full mt-5">
@@ -57,7 +58,7 @@
          <p class="py-3 text-color-gray-dark dark:text-color-gray-default">Current Clients {{currentYear}}</p>
          
          <div class="text-color-gray-darkest dark:text-color-gray-default flex flex-col text-sm">
-            <ul v-if="clients.length" class="space-y-3">
+            <ul v-if="clients.length > 0" class="space-y-3">
                <li v-for="client in clients" :key="client.clientId">
                   <div class="flex items-center w-full">
                      <div class="flex-none p-2 text-color-gray-darkest dark:text-color-gray-light">
@@ -75,7 +76,7 @@
                      </div>
                   </div>
                </li>
-               <button @click="createStat" class="py-3 px-4 bg-gray-900">Test Statistic</button>
+               <button @click="createStat" class="py-3 px-4 hidden bg-gray-900">Test Statistic</button>
             </ul>
             <div v-else class="flex items-center w-full">
                <div class="flex-none p-2 text-color-gray-darkest dark:text-color-gray-light">
@@ -105,7 +106,7 @@
                </span>
             </div></header>
          <p class="py-3 text-color-gray-dark dark:text-color-gray-default">Performance {{currentYear}}</p>
-         <PieCart1 class="w-52 max-h-60"/>
+         <!-- <PieCart1 class="w-52 max-h-60"/> -->
       </div>
   </div>
 </div>
@@ -114,12 +115,11 @@
 <script lang="ts">
 import { computed, defineComponent, onMounted, reactive, toRefs } from 'vue'
 import StatisticCard from '../components/cards/StatisticCard.vue'
-import PieCart from '../components/chart/PieCart.vue';
-import PieCart1 from '../components/chart/PieCart1.vue';
 import { useStatisticStore, useUserStore } from '../services';
+import { FlagUseOn } from '../types/EnumType';
 
 export default defineComponent({
-  components: { StatisticCard, PieCart, PieCart1 },
+  components: { StatisticCard },
    setup () {
       const statisticStore = useStatisticStore();
       const userStore = useUserStore();
@@ -136,7 +136,7 @@ export default defineComponent({
       })
 
       const createStat = () =>{
-         statisticStore.registerStatistic(state.uid)
+         statisticStore.registerStatistic(state.uid, FlagUseOn.REGISTRATION)
       }
       
       return {

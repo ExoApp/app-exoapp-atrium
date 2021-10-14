@@ -171,8 +171,8 @@ export interface IUser extends Info {
    isEro?: boolean
    nationality?: string
    isActive: boolean
-   email: string | null
-   username?: string
+   email: string
+   username: string
    fullName?: string
    telephone?: string
    photoUrl?: string
@@ -184,7 +184,7 @@ export interface IUser extends Info {
    religion?: Religion | string
    address: UserAddress
    roleDeveloper: IRoleDeveloper
-   mainRole?: IMainRole
+   mainRole: IMainRole
    clients: IClient[]
    userPreference: IUserPreference
    about?: string

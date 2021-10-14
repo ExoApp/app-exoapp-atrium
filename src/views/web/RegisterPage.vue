@@ -64,12 +64,13 @@
 <script lang="ts">
 import { computed, defineComponent, onMounted, reactive, toRefs } from 'vue';
 import { LockClosedIcon } from '@heroicons/vue/solid';
-import { useAuthStore, useStatisticStore, useTimesheetStore, useUserStore, useUtilityStore } from '../services';
+import { useAuthStore, useStatisticStore, useTimesheetStore, useUserStore, useUtilityStore } from '../../services';
 import { useRouter } from 'vue-router';
 import { createUserWithEmailAndPassword } from '@firebase/auth';
 import { useToast } from 'vue-toastification';
-import { auth } from '../services/useFirebaseService';
-import Spinner from '../components/modal/Spinner.vue';
+import { auth } from '../../services/useFirebaseService';
+import Spinner from '../../components/modal/Spinner.vue';
+import { FlagUseOn } from '../../types/EnumType';
 
 export default defineComponent({
    components: {
@@ -114,10 +115,10 @@ export default defineComponent({
                   authStore.onLoginAction(user);
 
                   /** Save User Details To tbl_users. */
-                  userStore.onRegisterUser({userId:user.uid, email: user.email})
+                  userStore.onRegisterUser({userId:user.uid, email: user.email as string})
 
                   /** Register Statistic storage. */
-                  statisticStore.registerStatistic(user.uid);
+                  statisticStore.registerStatistic(user.uid, FlagUseOn.REGISTRATION);
 
                   /** Register Timesheet storage. */
                   timesheetStore.registerTimesheet(user.uid);

@@ -1,15 +1,16 @@
 import { defineStore } from 'pinia';
 import { IAddress, IClient, ICurrentEro, IUser, IUserPreference } from '../types/InterfaceType';
 import { userMock } from '../utils/mockDataAPI';
-import { doc, getDoc, onSnapshot, setDoc, updateDoc, } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, onSnapshot, setDoc, updateDoc, } from 'firebase/firestore';
 import { db, storage } from '../services/useFirebaseService';
 import { useToast } from 'vue-toastification';
 import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 
 const toast = useToast();
 interface UserStoreState {
-   gender: string,
-   currentUser: IUser,
+   gender: string
+   currentUser: IUser
+   userList: IUser[]
    currentClient: IClient
    currentEro: ICurrentEro | null
    onLoadingStateUser: boolean
@@ -28,14 +29,38 @@ export const useUserStore = defineStore({
          telephone: '',
          eroImageAvatar: ''
       } as ICurrentEro,
-      currentClient: {} as IClient
+      currentClient: {} as IClient,
+      userList: [] as IUser[]
    }),
    actions: {
+      /**
+       * Get All User in Admin Action
+       */
+      async getAllUser() {
+         const userRef = collection(db, 'tbl_users');
+         getDocs(userRef)
+            .then((snapshot) => {
+               const userTemp: IUser[] = [];
+
+               snapshot.forEach((user) => {
+                  userTemp.push(user.data() as IUser);
+               })
+
+               this.userList = userTemp;
+            })
+      },
+
       /**
       * @param  {userId: IUser['userId'], email: IUser['email']} newData
       * @description register user to Database Collection
       */
-      async onRegisterUser(newData: { userId: IUser['userId'], email: IUser['email'] }) {
+      async onRegisterUser(newData: { userId: IUser['userId'], email: IUser['email'] }, googleNewData?: { user?: any, oauth?: boolean }) {
+
+         if (googleNewData?.oauth) {
+            const user = await getDoc(doc(db, 'tbl_users', newData.userId));
+            if (user.exists())
+               return
+         }
 
          const newUser: IUser = {
             userId: newData.userId,
@@ -45,9 +70,13 @@ export const useUserStore = defineStore({
             isActive: false,
             email: newData.email,
             username: `@${newData.email?.split('@')[0].replace('.', '_')}`,
-            fullName: `${newData.email?.split('@')[0]}`,
+            fullName: googleNewData?.oauth
+               ? googleNewData.user.displayName
+               : `${newData.email?.split('@')[0]}`,
             telephone: "",
-            photoUrl: "https://res.cloudinary.com/ekosutrisno/image/upload/v1627464871/avatars/profile1_otttcz.png",
+            photoUrl: googleNewData?.oauth
+               ? googleNewData.user.photoURL
+               : "https://res.cloudinary.com/ekosutrisno/image/upload/v1627464871/avatars/profile1_otttcz.png",
             gender: "",
             dob: "",
             pob: "",
@@ -111,7 +140,7 @@ export const useUserStore = defineStore({
                }
             ],
             userPreference: {
-               useThemeMode: "light",
+               useThemeMode: "dark",
                pushNotification: 3,
                sendToEmail: {
                   candidates: true,
@@ -137,11 +166,16 @@ export const useUserStore = defineStore({
          onSnapshot(docRef, (docSnap) => {
             if (docSnap.exists()) {
                const data: IUser = docSnap.data() as IUser;
+               // Set User Role
+               localStorage.setItem('_role', data.mainRole.roleId.toString());
+
+               // Set The Current User
                this.currentUser = data;
 
                // Get First CLient Only
                this.currentClient = data.clients[0];
 
+               // Stop the loading indicator
                this.onLoadingStateUser = false;
 
                if (!data.isEro && data.eroId)
@@ -293,7 +327,7 @@ export const useUserStore = defineStore({
        * @param  {IUser['email']} email
        * @returns IUser
        */
-      getLoginAsInfo(state): { fullName: IUser['username'], email: IUser['email'] } {
+      getLoginAsInfo(state): { fullName: IUser['fullName'], email: IUser['email'] } {
          const loginAs = {
             fullName: state.currentUser.fullName,
             email: state.currentUser.email

@@ -98,22 +98,36 @@ export const useClientStore = defineStore({
             })
       },
 
-      async addClient(client: IClient) {
+      async getAllClient(): Promise<void> {
+         const clientRef = collection(db, 'tbl_clients')
+         getDocs(clientRef)
+            .then((snapshot) => {
+               const clientTemp: IClient[] = [];
+
+               snapshot.forEach((client) => {
+                  clientTemp.push(client.data() as IClient);
+               })
+
+               this.clients = clientTemp;
+            })
+      },
+
+      async addClient(client: IClient): Promise<void> {
 
       },
 
-      async updateClient(client: IClient) {
+      async updateClient(client: IClient): Promise<void> {
 
       },
 
-      async deleteClient(clientId: IClient[ 'clientId' ]) {
+      async deleteClient(clientId: IClient['clientId']): Promise<void> {
 
       },
 
       /**
        * Init Calling insertInitClient ()
        */
-      async init() {
+      async init(): Promise<void> {
          await this.insertInitClient();
       }
 

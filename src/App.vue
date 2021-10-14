@@ -3,7 +3,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onBeforeMount, onMounted } from "vue";
+import {
+  computed,
+  defineComponent,
+  onBeforeMount,
+  onMounted,
+  reactive,
+} from "vue";
 import { useAuthStore, useStatisticStore, useUtilityStore } from "./services";
 
 export default defineComponent({
@@ -15,13 +21,25 @@ export default defineComponent({
     // const clientStore = useClientStore();
     // const vacancyStore = useVacancyStore();
 
+    const state = reactive({
+      uid: computed(() => localStorage.getItem("_uid") as string),
+    });
+
     onBeforeMount(() => authStore.authState());
     onMounted(async () => {
       // Check Theme Selected
       utilityStore.wathcThemeSelected();
 
-      // Listen All Snapshot Timesheet Data
-      await statisticStore.onSnapshotRealtimeUpdateStatistic();
+      // Check Connectivity
+      utilityStore.checkConnectifity();
+
+      if (state.uid) {
+        // Check and Generate if not exist (By Year)
+        // await statisticStore.registerStatistic(state.uid, FlagUseOn.GENERATION);
+
+        // Listen All Snapshot Timesheet Data
+        await statisticStore.onSnapshotRealtimeUpdateStatistic();
+      }
 
       // Insert Role Master if not present
       //roleStore.init();

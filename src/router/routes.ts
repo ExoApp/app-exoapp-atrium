@@ -1,8 +1,20 @@
 import { RouteRecordRaw } from "vue-router";
 
-// Views
+// Views web
+import HomePage from '../views/web/HomePage.vue';
+import LoginPage from '../views/web/LoginPage.vue';
+import RegisterPage from '../views/web/RegisterPage.vue';
+import ResetPasswordPage from '../views/web/ResetPasswordPage.vue';
+
+// View Admin
+import UserAdminAction from '../views/admin/UserAdminAction.vue';
+import TimesheetAdminAction from '../views/admin/TimesheetAdminAction.vue';
+import ClientAdminAction from '../views/admin/ClientAdminAction.vue';
+import StatisticAdminAction from '../views/admin/StatisticAdminAction.vue';
+import RoleAdminAction from '../views/admin/RoleAdminAction.vue';
+
+// Views Default
 import Dashboard from '../views/Dashboard.vue';
-import HomePage from '../views/HomePage.vue';
 import Project from '../views/Project.vue';
 import ProjectDetail from '../views/ProjectDetail.vue';
 import VacancyDetail from '../views/VacancyDetail.vue';
@@ -10,19 +22,28 @@ import StatisticDetail from '../views/StatisticDetail.vue';
 import Timesheet from '../views/Timesheet.vue';
 import UserSettings from '../views/UserSettings.vue';
 import Vacancy from '../views/Vacancy.vue';
-import LoginPage from '../views/LoginPage.vue';
-import RegisterPage from '../views/RegisterPage.vue';
 
 // Layouts
+import AdminView from '../layouts/AdminView.vue';
+import AdminLayout from '../layouts/AdminLayout.vue';
 import DashboardLayout from '../layouts/DashboardLayout.vue';
 import WebLayout from '../layouts/WebLayout.vue';
 
 const routes: RouteRecordRaw[] = [
    {
+      path: "/:pathMatch(.*)*",
+      name: "NotFound",
+      component: () => import("../views/web/404.vue"),
+      meta: {
+         title: 'Not Found Page',
+         requiresAuth: false
+      }
+   },
+   {
       path: '/',
       name: 'WebLayout',
       component: WebLayout,
-      children:[
+      children: [
          {
             path: '/',
             name: 'HomePage',
@@ -50,13 +71,31 @@ const routes: RouteRecordRaw[] = [
                requiresAuth: false
             }
          },
+         {
+            path: '/user/reset-password',
+            name: 'ResetPasswordPage',
+            component: ResetPasswordPage,
+            meta: {
+               title: 'Reset Password',
+               requiresAuth: false
+            }
+         },
+         {
+            path: '/user/unauthorized',
+            name: 'UnAuthorize',
+            component: () => import("../views/web/401.vue"),
+            meta: {
+               title: 'UnAuthorize',
+               requiresAuth: true
+            }
+         },
       ]
    },
    {
       path: '/',
       name: 'DashboardLayout',
       component: DashboardLayout,
-      children:[
+      children: [
          {
             path: `/u/0/dashboard`,
             name: `Dashboard`,
@@ -130,7 +169,75 @@ const routes: RouteRecordRaw[] = [
             }
          },
       ]
+   },
+   {
+      path: '/a/0/dashboard',
+      name: 'AdminView',
+      component: AdminView,
+      meta: {
+         title: 'Admin View',
+         requiresAuth: true,
+         requiresAdmin: true
+      }
+   },
+   {
+      path: '/',
+      name: 'AdminLayout',
+      component: AdminLayout,
+      children: [
+         {
+            path: `/a/0/dashboard/user_management`,
+            name: `UserAdminAction`,
+            component: UserAdminAction,
+            meta: {
+               title: `User Admin Action`,
+               requiresAuth: true,
+               requiresAdmin: true
+            }
+         },
+         {
+            path: `/a/0/dashboard/timesheet_management`,
+            name: `TimesheetAdminAction`,
+            component: TimesheetAdminAction,
+            meta: {
+               title: `Timesheet Admin Action`,
+               requiresAuth: true,
+               requiresAdmin: true
+            }
+         },
+         {
+            path: `/a/0/dashboard/statistic_management`,
+            name: `StatisticAdminAction`,
+            component: StatisticAdminAction,
+            meta: {
+               title: `Statistic Admin Action`,
+               requiresAuth: true,
+               requiresAdmin: true
+            }
+         },
+         {
+            path: `/a/0/dashboard/client_management`,
+            name: `ClientAdminAction`,
+            component: ClientAdminAction,
+            meta: {
+               title: `Client Admin Action`,
+               requiresAuth: true,
+               requiresAdmin: true
+            }
+         },
+         {
+            path: `/a/0/dashboard/role_management`,
+            name: `RoleAdminAction`,
+            component: RoleAdminAction,
+            meta: {
+               title: `Role Admin Action`,
+               requiresAuth: true,
+               requiresAdmin: true
+            }
+         },
+      ]
    }
+
 ]
 
 export default routes;

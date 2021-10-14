@@ -15,6 +15,7 @@ interface TimesheetStoreState {
    isSendProgress: boolean,
    todayAbsentAlready: boolean,
    onGenerateProcess: boolean,
+   currentMonthExist: boolean
 }
 
 export const useTimesheetStore = defineStore({
@@ -24,7 +25,8 @@ export const useTimesheetStore = defineStore({
       timehseetsNonFiltered: [] as ITimesheet[],
       isSendProgress: false,
       todayAbsentAlready: false,
-      onGenerateProcess: false
+      onGenerateProcess: false,
+      currentMonthExist: true
    }),
 
    actions: {
@@ -79,14 +81,15 @@ export const useTimesheetStore = defineStore({
          var userId = timesheet.user;
 
          const docRef = doc(db, `tbl_timesheet`, `${userId}`);
-         const docSnap = doc(docRef, `TS-${currentMonth()}`, timesheet.absensiId);
+         const docSnap = doc(docRef, `TS-${timesheet.year}-${timesheet.month}`, timesheet.absensiId);
          const docSnapSearch = doc(docRef, `timesheet`, timesheet.absensiId);
 
          /** Is set options to update statistic data */
          const options = {
             isWeekend: timesheet.isWeekend,
             edited: timesheet.edited,
-            statusAbsensi: timesheet.statusAbsensi
+            statusAbsensi: timesheet.statusAbsensi,
+            month: timesheet.month
          };
 
          /** Set edited to true */
@@ -214,6 +217,7 @@ export const useTimesheetStore = defineStore({
       async generateTimesheetTemplate(userId: IUser['userId']) {
 
          const userStore = useUserStore();
+         const statisticStore = useStatisticStore();
          const docRef = doc(db, `tbl_timesheet`, `${userId}`);
 
          getDocs(collection(docRef, `TS-${currentMonth()}`))
@@ -257,8 +261,14 @@ export const useTimesheetStore = defineStore({
                   }
 
                   setTimeout(() => {
+                     // Set loading progress to false
                      this.onGenerateProcess = false;
-                     toast.info(`Timesheet ${dayjs().format('MMMM YYYY')} has been generated`);
+
+                     // Generate Statistic Data per month
+                     statisticStore
+                        .generateStatisticCategoryPerMonth()
+                        .then(() => toast.info(`Timesheet ${dayjs().format('MMMM YYYY')} has been generated`))
+
                   }, 2500);
                }
             });
@@ -292,6 +302,19 @@ export const useTimesheetStore = defineStore({
                this.timehseets = filteredTimesheet;
             }
          });
+      },
+
+      checkCurrentMonthTimesheet() {
+         const docRef = doc(db, `tbl_timesheet`, `${localStorage.getItem('_uid') as string}`);
+         const collRef = collection(docRef, `TS-${currentMonth()}`);
+
+         onSnapshot(collRef, (snap) => {
+            if (snap.empty) {
+               this.currentMonthExist = false;
+            } else {
+               this.currentMonthExist = true;
+            }
+         })
       }
    },
 
