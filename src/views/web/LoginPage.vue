@@ -9,7 +9,7 @@
     </div>
 
     <!-- Main Form -->
-    <div class="max-w-md w-full space-y-8">
+    <div class="max-w-md with-transition w-full space-y-8">
       <div>
         <h2 class="mt-6 text-center text-3xl font-extrabold text-color-dark-gray-darker dark:text-color-gray-lighter">
           Login
@@ -56,7 +56,7 @@
       <div class="flex flex-col space-y-4 items-center justify-end">
         <div class="text-sm">
           <p class="font-medium text-gray-600 dark:text-color-gray-light">
-            Or sign in with Google?
+            Or continue with Google?
           </p>
         </div>
         <button @click="loginWithGoogleHandler"
@@ -82,14 +82,12 @@
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, reactive, toRefs } from 'vue';
-import { LockClosedIcon } from '@heroicons/vue/solid';
-import { useAuthStore, useUserStore, useUtilityStore } from '../../services';
 import { useRouter } from 'vue-router';
-import { signInWithEmailAndPassword } from '@firebase/auth';
-import { useToast } from 'vue-toastification';
+import { signInWithEmailAndPassword, signInWithPopup } from '@firebase/auth';
 import { auth, gProvider } from '../../services/useFirebaseService';
+import { useAuthStore, useUserStore, useUtilityStore } from '../../services';
+import { LockClosedIcon } from '@heroicons/vue/solid';
 import Spinner from '../../components/modal/Spinner.vue';
-import { signInWithPopup } from 'firebase/auth';
 import GoogleIcon from '../../components/svg/GoogleIcon.vue';
 
 export default defineComponent({
@@ -103,7 +101,6 @@ export default defineComponent({
       const authStore = useAuthStore();
       const userStore = useUserStore();
       const utilityStore = useUtilityStore();
-      const toast = useToast();
 
       const state = reactive({
          auth:{
@@ -130,9 +127,6 @@ export default defineComponent({
               /** Stop Loading and Redirect in to Dashboard. */
               state.isLoginProcess =  false;
               router.replace('/u/0/dashboard');
-
-              /** Show notification login succesfully. */
-              toast.success("Welcome back " + user.email);
           })
           .catch((error) => {
               const errorCode = error.code;
@@ -151,18 +145,17 @@ export default defineComponent({
       const loginWithGoogleHandler = () => {
          signInWithPopup(auth, gProvider)
             .then((result) => {
-               const user = result.user;
-               userStore
+                const user = result.user;
+                /** Save user data to DB */
+                userStore
                   .onRegisterUser({ userId: user.uid, email: user.email as string }, { user: user, oauth: true })
-                  .then(() => {
-                      
-                      authStore.onLoginAction(user);
-                      
-                      router.replace('/u/0/dashboard')
-                      
-                      /** Show notification login succesfully. */
-                      toast.success("Welcome back " + user.email);
-                  });
+                    .then(() => {
+                        
+                        authStore.onLoginAction(user);
+                        
+                        router.replace('/u/0/dashboard')
+                    });
+
             }).catch((error) => {
                 const errorCode = error.code;
                 const errorMessage = error.message;

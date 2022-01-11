@@ -1,5 +1,13 @@
 import dayjs from "dayjs"
-import { computed } from "vue";
+import { generatePushID } from "./generatedPushId";
+
+/**
+ * This method will return 20 random characters string
+ * @returns string
+ */
+export const generateID = (): string => {
+   return generatePushID();
+}
 
 /**
  * @param  {any} value
@@ -138,4 +146,30 @@ export const isMatchPassword = (newPassword: string, newConfirmPassword: string)
    if ((newPassword.trim().length >= 6) && (newConfirmPassword.trim().length >= 6))
       return newPassword.trim() === newConfirmPassword.trim();
    return false;
+};
+
+
+/**
+ * Format Size file function
+ */
+export const formatBytes = (bytes: number, decimals = 2) => {
+   if (bytes === 0) return "0 Bytes";
+
+   const k = 1024;
+   const dm = decimals < 0 ? 0 : decimals;
+   const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+
+   const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
+};
+
+/**
+ * Return File Extentions
+ */
+export const checkFileExt = (fileName: any) => {
+   var fileExtensionPattern = /\.([0-9a-z]+)(?=[?#])|(\.)(?:[\w]+)$/gim;
+   return fileName.includes(".")
+      ? fileName.match(fileExtensionPattern)[0]
+      : ".exe";
 };

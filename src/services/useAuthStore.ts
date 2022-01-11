@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { onAuthStateChanged, reauthenticateWithCredential, sendEmailVerification, sendPasswordResetEmail, signOut, updateEmail, updatePassword, User, AuthCredential, EmailAuthProvider, deleteUser } from 'firebase/auth';
+import { onAuthStateChanged, reauthenticateWithCredential, sendEmailVerification, sendPasswordResetEmail, signOut, updateEmail, updatePassword, User, AuthCredential, EmailAuthProvider, deleteUser, confirmPasswordReset } from 'firebase/auth';
 import { useToast } from "vue-toastification";
 import { auth, db } from '../services/useFirebaseService';
 import { useUserStore } from "./useUserStore";
@@ -15,7 +15,7 @@ type CurrentUserSession = {
    photoUrl: string
    email: string
    emailVerified: boolean
-   providedId: string
+   providedId: string[]
 }
 
 interface AuthStoreState {
@@ -26,6 +26,7 @@ interface AuthStoreState {
       errorCode: string | null
       errorMessage: string | null
    }
+   emailNotRegiter: boolean
 }
 
 export const useAuthStore = defineStore({
@@ -34,6 +35,7 @@ export const useAuthStore = defineStore({
       isLoggedIn: false,
       isRegisterProcess: false,
       currentUserSession: {} as CurrentUserSession,
+      emailNotRegiter: false,
       error: {
          errorCode: null,
          errorMessage: null
@@ -52,7 +54,7 @@ export const useAuthStore = defineStore({
             photoUrl: user?.photoURL,
             email: user?.email,
             emailVerified: user?.emailVerified,
-            providedId: user?.providerData[0].providerId
+            providedId: user?.providerData.map((prov: any) => prov.providerId)
          } as CurrentUserSession
 
          this.currentUserSession = currentUser;
@@ -65,10 +67,9 @@ export const useAuthStore = defineStore({
       async onLogoutAction(): Promise<void> {
          signOut(auth).then(() => {
             localStorage.removeItem('_uid');
-            toast.info("You has been logout.")
+            localStorage.removeItem('_role');
          }).catch((error) => {
             this.setErrorData(error);
-            toast.error(`Failed, ${error.code}`);
          });
       },
 
@@ -170,24 +171,37 @@ export const useAuthStore = defineStore({
 
          getDocs(q)
             .then(async (snapshot) => {
-               if (snapshot.size === 1 && validateEmail(email))
+               if (snapshot.size === 1 && validateEmail(email)) {
                   await sendPasswordResetEmail(auth, email)
                      .then(() => {
-                        // TODO
+                        toast.info('Reset password link has been sent, please check your email.');
                      })
                      .catch((error) => {
                         this.setErrorData(error);
                      });
+               }
+               else {
+                  this.emailNotRegiter = true;
+                  toast.warning(`${email} not registered email.`);
+               }
             })
 
+         setTimeout(() => {
+            this.emailNotRegiter = false;
+         }, 5000);
       },
-     /**
-      * This method and handle send email verification after user register
-      * @returns Promise
-      */
-     async sendVerificationEmail(): Promise<void> {
 
-        await sendEmailVerification(auth.currentUser as User)
+      async resetPasswordConfirm(oobCode: string, newPassword: string) {
+         await confirmPasswordReset(auth, `${oobCode}`, newPassword);
+      },
+
+      /**
+       * This method and handle send email verification after user register
+       * @returns Promise
+       */
+      async sendVerificationEmail(): Promise<void> {
+
+         await sendEmailVerification(auth.currentUser as User)
             .then(() => {
                // TODO
             });

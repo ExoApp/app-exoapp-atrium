@@ -1,3 +1,4 @@
+import { User } from "firebase/auth";
 import { Gender, Religion, StatusAbsensi } from "./EnumType";
 
 export interface AnyObject {
@@ -14,6 +15,13 @@ export interface IMainRole {
    roleName: string
    roleDescription: string
    isActive: boolean
+}
+
+export interface IRoleDeveloper extends Info {
+   roleDeveloperId: number
+   roleDeveloperName: string
+   roleDeveloperDesc?: string
+   roleDeveloperSalary?: string
 }
 
 export interface IProject extends Info {
@@ -137,13 +145,6 @@ export interface IAddress extends Info {
    kecamatan?: string
 }
 
-export interface IRoleDeveloper extends Info {
-   roleDeveloperId: number
-   roleDeveloperName: string
-   roleDeveloperDesc?: string
-   roleDeveloperSalary?: string
-}
-
 export interface IOrtu extends Info {
    namaAyah?: string
    dobAyah?: Date | any
@@ -158,11 +159,17 @@ export interface IOrtu extends Info {
 
 export interface IClient extends Info {
    clientId: string
-   clientName: string
-   clientAddress?: string
-   clientKota?: string
-   clientProvinsi?: string
-   clientCountry?: string
+   name: string
+   email: string
+   telephone?: string
+   address?: string
+   kota?: string
+   provinsi?: string
+   country?: string
+   postalCode?: string
+   image?: string
+   description?: string
+   website?: string
 }
 
 export interface IUser extends Info {
@@ -185,7 +192,7 @@ export interface IUser extends Info {
    address: UserAddress
    roleDeveloper: IRoleDeveloper
    mainRole: IMainRole
-   clients: IClient[]
+   client: null | IClient
    userPreference: IUserPreference
    about?: string
 }
@@ -228,3 +235,21 @@ export type UserAddress = {
    addressAsli: IAddress
    addressDomisili: IAddress
 } & Info
+
+
+export interface FileAttachment extends Info{
+   userId: string
+   name: string
+   size: number
+   sizeText: string
+   url: string
+   uploadedAt: number
+   type: string
+}
+
+export interface Notification extends Info {
+   type: string
+   text: string
+   timestamp: number
+   data: null | any
+}

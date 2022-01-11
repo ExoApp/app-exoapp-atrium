@@ -5,13 +5,15 @@ import { collection, doc, getDoc, getDocs, onSnapshot, setDoc, updateDoc, } from
 import { db, storage } from '../services/useFirebaseService';
 import { useToast } from 'vue-toastification';
 import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
+import { useStatisticStore, useTimesheetStore } from '.';
+import { FlagUseOn } from '../types/EnumType';
 
 const toast = useToast();
 interface UserStoreState {
    gender: string
    currentUser: IUser
    userList: IUser[]
-   currentClient: IClient
+   currentClient: IClient | null
    currentEro: ICurrentEro | null
    onLoadingStateUser: boolean
 }
@@ -22,13 +24,7 @@ export const useUserStore = defineStore({
       gender: '',
       onLoadingStateUser: true,
       currentUser: userMock,
-      currentEro: {
-         eroId: '',
-         email: '',
-         fullName: '',
-         telephone: '',
-         eroImageAvatar: ''
-      } as ICurrentEro,
+      currentEro: {} as ICurrentEro,
       currentClient: {} as IClient,
       userList: [] as IUser[]
    }),
@@ -60,6 +56,17 @@ export const useUserStore = defineStore({
             const user = await getDoc(doc(db, 'tbl_users', newData.userId));
             if (user.exists())
                return
+            else {
+
+               const statisticStore = useStatisticStore();
+               const timesheetStore = useTimesheetStore();
+
+               /** Register Statistic storage. */
+               statisticStore.registerStatistic(newData.userId, FlagUseOn.REGISTRATION);
+
+               /** Register Timesheet storage. */
+               timesheetStore.registerTimesheet(newData.userId);
+            }
          }
 
          const newUser: IUser = {
@@ -67,7 +74,7 @@ export const useUserStore = defineStore({
             eroId: '',
             isEro: false,
             nationality: "",
-            isActive: false,
+            isActive: googleNewData?.oauth ? googleNewData.user.emailVerified : false,
             email: newData.email,
             username: `@${newData.email?.split('@')[0].replace('.', '_')}`,
             fullName: googleNewData?.oauth
@@ -116,29 +123,18 @@ export const useUserStore = defineStore({
                },
             },
             roleDeveloper: {
-               roleDeveloperId: 8,
-               roleDeveloperName: 'On Bootcamp',
-               roleDeveloperDesc: 'Role as Bootcamp former',
-               roleDeveloperSalary: 'Rp100K / Day',
+               roleDeveloperId: 11,
+               roleDeveloperName: 'Applicants',
+               roleDeveloperDesc: 'Role as Applicants',
+               roleDeveloperSalary: 'Rp0K',
             },
             mainRole: {
-               roleId: 6,
+               roleId: 7,
                isActive: true,
-               roleName: 'Employee',
-               roleDescription: 'Role as Employee'
+               roleName: 'Applicants',
+               roleDescription: 'Role as Applicants'
             },
-            clients: [
-               {
-                  clientId: '6',
-                  clientName: '__BOOTCAMP__',
-                  clientAddress: 'Jl. Dr. Satrio Lt 25',
-                  clientCountry: 'Indonesia',
-                  clientKota: 'Jakarta Pusat',
-                  clientProvinsi: 'DKI Jakarta',
-                  createdDate: Date.now(),
-                  lastModifiedDate: Date.now()
-               }
-            ],
+            client: null,
             userPreference: {
                useThemeMode: "dark",
                pushNotification: 3,
@@ -173,7 +169,7 @@ export const useUserStore = defineStore({
                this.currentUser = data;
 
                // Get First CLient Only
-               this.currentClient = data.clients[0];
+               this.currentClient = data.client;
 
                // Stop the loading indicator
                this.onLoadingStateUser = false;
@@ -185,7 +181,6 @@ export const useUserStore = defineStore({
             }
          })
       },
-
 
       /**
        * @param  {IUser['userId']} userId
@@ -212,6 +207,23 @@ export const useUserStore = defineStore({
        */
       async updateCurrentUserData(user: IUser) {
          var userId = user.userId;
+         user.client =
+            {
+               website: "https://www.telkom.co.id/sites",
+               lastModifiedDate: 1635859320438,
+               address: "Telkom Landmark Tower, 39-nd floor Jl. Jendral Gatot Subroto Kav. 52 RT.6/RW.1, Kuningan Barat, Mampang Prapatan",
+               name: "PT Baskom Indonesia",
+               clientId: "-MnLhwdWF5NeiaYy6bcI",
+               description: "© 2020 PT Baskom Indonesia (Persero) Tbk. Hak Cipta Dilindungi Undang-Undang",
+               telephone: "+62 21 - 808 63539",
+               provinsi: "DKI Jakarta", "kota": "Jakarta Selatan",
+               email: "corporate_comm@baskom.co.id",
+               postalCode: "12711",
+               country: "Indonesia",
+               image: "https://images.unsplash.com/photo-1462206092226-f46025ffe607?ixid=MnwxMjA3fDB8MHxzZWFyY2h8N3x8Y29tcGFueXxlbnwwfHwwfHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+               createdDate: 1635689941601
+            } as IClient
+
 
          const docRef = doc(db, "tbl_users", userId);
          setDoc(docRef, user, { merge: true })
@@ -317,8 +329,8 @@ export const useUserStore = defineStore({
        * @param  {} state
        * @returns IUser.clients
        */
-      getUserClient(state): IUser['clients'] {
-         return state.currentUser ? state.currentUser.clients : [];
+      getUserClient(state): IUser['client'] {
+         return state.currentUser.client
       },
 
       /**

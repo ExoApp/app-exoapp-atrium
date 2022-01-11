@@ -1,5 +1,5 @@
 <template>
-  <div class="flex relative w-full pb-10">
+  <div class="flex relative w-full">
    <div class="flex-1">
       <header class="card-wrapper-custom relative pt-[18px] max-w-2xl flex flex-col-reverse sm:flex-row sm:justify-between">
          <div class="text-color-dark-black-default dark:text-color-gray-light">
@@ -13,19 +13,17 @@
             </h1>
             <p class="text-color-gray-darkest dark:text-color-gray-default mt-1.5"> {{currentUser.email}} </p>
             <p class="text-color-gray-darkest dark:text-color-gray-default mt-1.5">Joined on {{formatDateWithMonth(currentUser.joinAt)}} ({{formatDateFromNow(currentUser.joinAt)}})</p>
-            <p class="text-color-gray-darkest dark:text-color-gray-default mt-1.5">Created {{ projectTotal }} projects. <br class="sm:hidden"> Work on {{ currentUser.clients.length }} client.</p>
+            <p class="text-color-gray-darkest dark:text-color-gray-default mt-1.5">Created {{ projectTotal }} projects.</p>
             <div class="text-color-gray-darkest dark:text-color-gray-default flex flex-col mt-4 text-sm">
               <span>Current Clients</span>
-              <ul class="mt-1">
-                <li v-for="client in currentUser.clients" :key="client.clientId">
-                  <span  class="font-semibold text-indigo-600 dark:text-indigo-300 "> 
-                    {{ client.clientName }} 
-                  </span>
-                </li>
-              </ul>
-              <span v-if="!currentUser.clients.length"  class="font-semibold text-indigo-600 dark:text-indigo-300 "> 
-                __LOADING__
+              <span v-if="!currentUser.client"  class="font-semibold text-indigo-600 dark:text-indigo-300 "> 
+                __NO_CLIENT__
               </span>
+              <ul v-else class="mt-1">
+                  <span  class="font-semibold text-indigo-600 dark:text-indigo-300 "> 
+                    {{ currentUser.client.name }} 
+                  </span>
+              </ul>
             </div>
          </div>
          <div class="flex-shrink-0 relative h-36 w-36 rounded-full overflow-hidden">
@@ -37,7 +35,7 @@
             <input id="file-upload" name="file-upload" type="file" class="sr-only" @change="onUpdateAvatar">
            <img class="h-36 w-36 rounded-full border-color-dark-gray-lightest dark:border-color-gray-darkest shadow-sm border-2 dark:border-opacity-30" :src="currentUser.photoUrl" alt="profile-avatar" />
          </div>
-         <div class="absolute p-1 text-xs dark:bg-[#9a6fc3] bg-[#a87cd1] font-semibold -bottom-3 right-3 rounded text-color-gray-lightest dark:text-white shadow-lg">
+         <div :class="[currentUser.roleDeveloper.roleDeveloperId == 7 ? 'dark:bg-[#28a3a3] bg-[#54b3b3]' : 'dark:bg-[#9a6fc3] bg-[#a87cd1]']" class="absolute p-1 text-xs font-semibold -bottom-3 right-3 rounded text-color-gray-lightest dark:text-white shadow-lg">
            {{currentUser.roleDeveloper.roleDeveloperName }}
          </div>
       </header>
@@ -50,8 +48,8 @@
         <!-- Left Column -->
         <div class="lg:col-span-1 space-y-6">
           
-          <!-- Switch Tabs -->
-          <div class="card-wrapper-custom-default overflow-hidden md:sticky top-6 max-h-48">
+          <!-- Switch Tabs Start -->
+          <div class="card-wrapper-custom-default hidden lg:block overflow-hidden md:sticky top-6 max-h-48">
             <div class="text-color-dark-black-default dark:text-color-gray-lightest">
               <div class="text-color-gray-darkest w-full dark:text-color-gray-default flex flex-col text-sm">
                 <button 
@@ -59,7 +57,7 @@
                   v-for="menu in menuTabs" :key="menu.id" 
                   :class="[currentTabs === menu.current ? 'border-indigo-600 font-semibold bg-indigo-50 dark:bg-color-gray-darkest': 'dark:hover:bg-color-gray-darkest']" 
                   type="button" 
-                  class="px-4 py-2 w-full text-gray-700 dark:text-color-gray-lighter inline-flex items-center cursor-default sm:cursor-pointer border-l-4 transition-opacity border-transparent"
+                  class="px-3 py-2 w-full text-gray-700 dark:text-color-gray-lighter inline-flex items-center cursor-default sm:cursor-pointer border-l-4 transition-opacity border-transparent"
                 >
                   {{ menu.text }}
                 </button>
@@ -75,7 +73,7 @@
                     <span>Enable dark mode</span>
                       <div class="inline-flex items-center space-x-4 mt-3">
                         <button type="button" v-if="theme == 'dark'" @click="togleDarkLightMode('light')"
-                          class="with-transition text-[#9a6fc3] py-2 px-4 text-xs rounded border border-[#9a6fc3]  dark:hover:bg-color-dark-gray-darkest"
+                          class="with-transition text-[#9a6fc3] py-2 px-4 text-xs rounded border border-[#9a6fc3] dark:hover:bg-color-dark-gray-darkest"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -111,18 +109,40 @@
           <!-- Connected Account -->
           <div class="card-wrapper-custom md:sticky top-[24.75rem] h-auto pt-[18px]">
             <div class="text-color-dark-black-default dark:text-color-gray-lightest">
-                <h1 class="text-lg font-medium">Connected accounts</h1>
+                <h1 class="text-lg font-medium">Login provider</h1>
                 <div class="text-color-gray-darkest dark:text-color-gray-default flex flex-col mt-1 text-sm">
                     <span>Your current logging provider.</span>
-                      <div v-if="providedId === 'google.com'" class="inline-flex items-center space-x-4 mt-3">
-                        <GoogleIcon class="w-7 mr-2"/>
-                        <p class="text-color-dark-gray-darker dark:text-color-gray-light uppercase font-semibold"> {{ 'Google' }} </p>
+                      <div v-for="prov in providedId" :key="prov" class="mt-3">
+                        
+                        <div v-if="prov == 'google.com'" class="inline-flex items-center space-x-4">
+                          <GoogleIcon class="w-7"/>
+                          <p class="text-color-dark-gray-darker dark:text-color-gray-light uppercase font-semibold"> {{ 'Google' }} </p>
+                        </div>
+                        
+                        <div v-if="prov == 'password'" class="inline-flex items-center space-x-4">
+                          <img alt="firebase" src="/firebase.png" width="28" height="28" />
+                          <p class="text-color-dark-gray-darker dark:text-color-gray-light uppercase font-semibold"> {{ 'Firebase' }} </p>
+                        </div>
+
                       </div>
-                      <div v-if="providedId === 'password'" class="inline-flex items-center space-x-4 mt-3">
-                        <img alt="firebase" src="/firebase.png" width="28" height="28" />
-                        <p class="text-color-dark-gray-darker dark:text-color-gray-light uppercase font-semibold"> {{ 'Firebase' }} </p>
-                    </div>
-                </div>
+                  </div>
+              </div>
+          </div>
+
+          <!-- Switch Tabs End -->
+          <div class="card-wrapper-custom-default lg:hidden overflow-hidden md:sticky top-6 max-h-48">
+            <div class="text-color-dark-black-default dark:text-color-gray-lightest">
+              <div class="text-color-gray-darkest w-full dark:text-color-gray-default flex flex-col text-sm">
+                <button 
+                  @click="switchTab(menu.current)" 
+                  v-for="menu in menuTabs" :key="menu.id" 
+                  :class="[currentTabs === menu.current ? 'border-indigo-600 font-semibold bg-indigo-50 dark:bg-color-gray-darkest': 'dark:hover:bg-color-gray-darkest']" 
+                  type="button" 
+                  class="px-3 py-2 w-full text-gray-700 dark:text-color-gray-lighter inline-flex items-center cursor-default sm:cursor-pointer border-l-4 transition-opacity border-transparent"
+                >
+                  {{ menu.text }}
+                </button>
+              </div>
             </div>
           </div>
           
@@ -135,7 +155,7 @@
           <!-- Current Ero and Client Detail -->
           <div v-else-if="currentTabs === 'Ero_Client'" class="space-y-6">
             <div v-if="!currentUser.isEro" class="card-wrapper-custom with-transition max-h-full pt-[18px]">
-                <div class="border-b relative p-2 border-gray-200 dark:border-color-gray-darkest">
+                <div class="border-b relative border-gray-200 dark:border-color-gray-darkest">
                     <h3 class="text-lg leading-6 font-medium text-color-dark-gray-darkest dark:text-color-gray-lighter">
                         Current ERO
                     </h3>
@@ -144,7 +164,7 @@
                     </p>
                   </div>
                 <div v-if="currentEro !== null" class="text-color-dark-black-default mt-2 flex flex-col-reverse sm:flex-row items-start sm:items-center justify-between dark:text-color-gray-lightest">
-                    <div class="text-color-gray-darkest p-2 dark:text-color-gray-default flex flex-col mt-1 space-y-2">
+                    <div class="text-color-gray-darkest dark:text-color-gray-default flex flex-col mt-1 space-y-2">
                         <div class="flex flex-col">
                           <p class="text-sm">FullName</p>
                           <p class="text-color-dark-gray-darker dark:text-color-gray-light">{{ currentEro.fullName}}</p>
@@ -161,56 +181,26 @@
                     <img class="h-36 w-36 rounded-full border-color-dark-gray-lightest dark:border-color-gray-darkest shadow-sm border-2 dark:border-opacity-30" :src="currentEro.eroImageAvatar" alt="profile-avatar" />
                 </div>
                 <div v-else>
-                  <p class="my-3 ml-2 max-w-2xl text-sm text-gray-500 dark:text-color-gray-default">
+                  <p class="my-3 max-w-2xl text-sm text-gray-500 dark:text-color-gray-default">
                     Currently you do not have an ERO, please contact the officer for more info.
                   </p>
                 </div>
             </div>
-            <div v-if="currentUser.clients" class="card-wrapper-custom with-transition max-h-full pt-[18px]">
-                <div class="border-b relative p-2 border-gray-200 dark:border-color-gray-darkest">
+            <div class="card-wrapper-custom with-transition max-h-full pt-[18px]">
+                <div class="border-b relative border-gray-200 dark:border-color-gray-darkest">
                     <h3 class="text-lg leading-6 font-medium text-color-dark-gray-darkest dark:text-color-gray-lighter">
-                        Current Clients
+                        Current Client
                     </h3>
                     <p class="mt-1 max-w-2xl text-sm text-gray-500 dark:text-color-gray-default">
-                        Your current Clients details info
+                        Your current Client details info
                     </p>
-                  </div>
-                <div class="text-color-gray-darkest dark:text-color-gray-default flex flex-col text-sm">
-                  <ul v-if="currentUser.clients.length" class="space-y-3">
-                    <li v-for="client in currentUser.clients" :key="client.clientId">
-                        <div class="flex items-center w-full my-2">
-                          <div class="flex-none p-2 text-color-gray-darkest dark:text-color-gray-light">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-color-gray-dark" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                              </svg>
-                          </div>
-                          <div class="flex flex-col flex-1 w-full">
-                              <span  class="font-semibold transition-colors text-indigo-600 hover:text-indigo-700 dark:text-indigo-300 dark:hover:text-indigo-400 sm:cursor-pointer"> 
-                                {{ client.clientName }} 
-                              </span>
-                              <span class="text-xs">
-                                {{ client.clientAddress }}, {{ client.clientProvinsi }}, {{ client.clientCountry }}.
-                              </span>
-                          </div>
-                        </div>
-                    </li>
-                  </ul>
-                  <div v-else class="flex items-center w-full mt-2">
-                    <div class="flex-none p-2 text-color-gray-darkest dark:text-color-gray-light">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-color-gray-dark" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                        </svg>
-                    </div>
-                    <div class="flex flex-col flex-1 w-full">
-                        <span  class="font-semibold transition-colors text-indigo-600 hover:text-indigo-700 dark:text-indigo-300 dark:hover:text-indigo-400 sm:cursor-pointer"> 
-                          __Loading__ 
-                        </span>
-                        <span class="text-xs">
-                          Proccess to fetching data
-                        </span>
-                    </div>
-                  </div>
-              </div>
+                </div>
+                <ClientInfo v-if="currentUser.client" :client="currentUser.client"/>
+                <div v-else>
+                  <p class="my-3 max-w-2xl text-sm text-gray-500 dark:text-color-gray-default">
+                      Currently you do not have a client, please contact the officer for more info.
+                  </p>
+                </div>
             </div>
           </div>
 
@@ -230,9 +220,10 @@ import GoogleIcon from "../components/svg/GoogleIcon.vue";
 import { formatDateFromNow, formatDateWithMonth } from '../utils/helperFunction';
 import { useAuthStore, useProjectStore, useUserStore, useUtilityStore } from '../services';
 import { useToast } from "vue-toastification";
+import ClientInfo from "../components/ClientInfo.vue";
 
 export default defineComponent({
-  components: { GeneralProfileInfo, GoogleIcon, CredentialProfileInfo},
+  components: { GeneralProfileInfo, GoogleIcon, CredentialProfileInfo, ClientInfo},
   setup() {
     const utilityStore = useUtilityStore();
     const projectStore = useProjectStore();

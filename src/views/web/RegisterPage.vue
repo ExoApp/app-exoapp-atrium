@@ -9,7 +9,7 @@
     </div>
 
     <!-- main Form -->
-    <div class="max-w-md w-full space-y-8">
+    <div class="max-w-md with-transition w-full space-y-8">
       <div>
         <h2 class="mt-6 text-center text-3xl font-extrabold text-color-dark-gray-darker dark:text-color-gray-lighter">
           Sign Up
@@ -63,14 +63,14 @@
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, reactive, toRefs } from 'vue';
-import { LockClosedIcon } from '@heroicons/vue/solid';
-import { useAuthStore, useStatisticStore, useTimesheetStore, useUserStore, useUtilityStore } from '../../services';
 import { useRouter } from 'vue-router';
-import { createUserWithEmailAndPassword } from '@firebase/auth';
-import { useToast } from 'vue-toastification';
 import { auth } from '../../services/useFirebaseService';
-import Spinner from '../../components/modal/Spinner.vue';
+import { useAuthStore, useStatisticStore, useTimesheetStore, useUserStore, useUtilityStore } from '../../services';
+import { createUserWithEmailAndPassword } from '@firebase/auth';
 import { FlagUseOn } from '../../types/EnumType';
+import { isMatchPassword } from '../../utils/helperFunction';
+import { LockClosedIcon } from '@heroicons/vue/solid';
+import Spinner from '../../components/modal/Spinner.vue';
 
 export default defineComponent({
    components: {
@@ -84,7 +84,6 @@ export default defineComponent({
       const statisticStore = useStatisticStore();
       const utilityStore = useUtilityStore();
       const timesheetStore = useTimesheetStore();
-      const toast = useToast();
 
       const state = reactive({
          auth:{
@@ -97,12 +96,7 @@ export default defineComponent({
          useBlur: computed(()=> utilityStore.useBlur)
       })
 
-      const validate = computed(()=>{
-         var validatePasswordLength = state.auth.password.trim().length >=6 
-                                       && state.auth.confirmPassword.trim().length >=6;
-         var validatePasswordMatch = state.auth.password.trim() === state.auth.confirmPassword.trim();
-         return validatePasswordLength && validatePasswordMatch;
-      })
+      const validate = computed(()=>isMatchPassword(state.auth.password, state.auth.confirmPassword))
 
       const onRegisterAction = () =>{
          state.isRegisterProcess = true;
@@ -115,7 +109,7 @@ export default defineComponent({
                   authStore.onLoginAction(user);
 
                   /** Save User Details To tbl_users. */
-                  userStore.onRegisterUser({userId:user.uid, email: user.email as string})
+                  userStore.onRegisterUser({userId:user.uid, email: user.email as string});
 
                   /** Register Statistic storage. */
                   statisticStore.registerStatistic(user.uid, FlagUseOn.REGISTRATION);
@@ -123,12 +117,9 @@ export default defineComponent({
                   /** Register Timesheet storage. */
                   timesheetStore.registerTimesheet(user.uid);
 
-                  /** Set isRegoster to false and Redirect to Dashboard page. */
+                  /** Set isRegister to false and Redirect to Dashboard page. */
                   state.isRegisterProcess = false;
                   router.replace('/u/0/dashboard');
-
-                  /** Show Notification if login sucessfully. */
-                  toast.success(`Welcome ${user.email} to Atrium.`);
               })
               .catch((error) => {
                   const errorCode = error.code;
