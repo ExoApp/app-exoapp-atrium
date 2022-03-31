@@ -18,8 +18,7 @@ interface TimesheetStoreState {
    currentMonthExist: boolean
 }
 
-export const useTimesheetStore = defineStore({
-   id: 'useTimesheetStore',
+export const useTimesheetStore = defineStore('useTimesheetStore', {
    state: (): TimesheetStoreState => ({
       timehseets: [] as ITimesheet[],
       timehseetsNonFiltered: [] as ITimesheet[],
@@ -115,7 +114,7 @@ export const useTimesheetStore = defineStore({
          const docRef = doc(db, `tbl_timesheet`, `${userId}`);
          const collRef = collection(docRef, `TS-${currentMonth()}`);
 
-         const q = query(collRef, where("isDone", "==", false));
+         const q = query(collRef, where("__v", "==", 0));
 
          onSnapshot(q, (querySnapshot) => {
 
@@ -141,12 +140,13 @@ export const useTimesheetStore = defineStore({
        * @param  {IUser['userId']} userId
        * Check if timesheet already fill properly and then send
        */
-      async checkTimesheetAlreadyAndUpdate(userId: IUser['userId'], isReady: boolean) {
-
-         if (isReady)
-            toast.warning('Make sure all timesheets are filled in properly.')
+      async checkTimesheetAlreadyAndUpdate(userId: IUser['userId'], search: { from: string, to: string }, isCurrentPriode: boolean) {
+         if (isCurrentPriode) {
+            toast.warning(`From ${search.from} to ${search.to}`);
+            // this.sendTimesheet(userId);
+         }
          else
-            this.sendTimesheet(userId);
+            toast.warning(`From ${search.from} to ${search.to}`);
 
       },
 
@@ -186,7 +186,7 @@ export const useTimesheetStore = defineStore({
             })
 
             /** Off loading State*/
-            this.isSendProgress = true;
+            this.isSendProgress = false;
 
             /** Notification */
             toast.info(`Timesheet has been sent to ERO.`);

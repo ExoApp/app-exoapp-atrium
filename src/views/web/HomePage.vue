@@ -8,7 +8,9 @@
         
         <p class="md:text-lg text-base mt-2 mb-10 p-2 text-gray-400">
           Organize and manage your timesheet report easily using 
-            <span class="text-indigo-300 font-semibold">At</span><span class="text-indigo-50 font-semibold">Rium</span>
+            <span class="text-indigo-50 font-semibold">OPEN </span>
+            <span class="text-indigo-300 font-semibold">AT</span>
+            <span class="text-indigo-50 font-semibold">RIUM</span>
         </p>
 
         <div class="flex items-center my-4">
@@ -59,10 +61,10 @@
 import { signInWithPopup } from '@firebase/auth';
 import { computed, defineComponent, reactive, toRefs } from 'vue';
 import { useRouter } from 'vue-router';
-import Loader from '../../components/modal/Loader.vue';
-import GoogleIcon from '../../components/svg/GoogleIcon.vue';
-import { useAuthStore, useUserStore } from '../../services';
-import { auth, gProvider } from '../../services/useFirebaseService';
+import Loader from '@/components/modal/Loader.vue';
+import GoogleIcon from '@/components/svg/GoogleIcon.vue';
+import { useAuthStore, useUserStore } from '@/services';
+import { auth, gProvider } from '@/services/useFirebaseService';
 export default defineComponent({
   components: { Loader, GoogleIcon },
   setup(){

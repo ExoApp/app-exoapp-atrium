@@ -9,7 +9,7 @@
          <p class="text-color-dark-gray-darker dark:text-color-gray-light"><span class="font-semibold">{{ collectionTs.collectionDate !== '' ? formatDateWithDayMonth(collectionTs.collectionDate): '-' }}</span></p>
       </div>
       <div class="flex flex-col">
-         <p class="text-sm text-indigo-500 font-extrabold">Performance</p>
+         <p class="text-sm text-indigo-500 dark:text-indigo-400 font-extrabold">Performance</p>
          <p class="text-color-dark-gray-darker font-semibold dark:text-color-gray-light">{{ toFixedFormat(collectionTs.performance) }}</p>
       </div>
 
@@ -22,8 +22,8 @@
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { IStatisticTImesheetCollectionMeta } from '../../types/InterfaceType'
-import { formatDateWithMonth, formatDateWithDayMonth, toFixedFormat, currentMonthOnly } from '../../utils/helperFunction';
+import { IStatisticTImesheetCollectionMeta } from '@/types/InterfaceType'
+import { formatDateWithMonth, formatDateWithDayMonth, toFixedFormat, currentMonthOnly } from '@/utils/helperFunction';
 
 export default defineComponent({
    props:{

@@ -13,7 +13,7 @@
          <p class="text-color-dark-gray-darker dark:text-color-gray-light"><span class="font-semibold">{{ absen.jumlahHariCuti }}</span> <span class="text-xs">Hari</span></p>
       </div>
       <div class="flex flex-col">
-         <p class="text-sm text-indigo-500 font-extrabold">Performance</p>
+         <p class="text-sm text-indigo-500 dark:text-indigo-400 font-extrabold">Performance</p>
          <p class="text-color-dark-gray-darker font-semibold dark:text-color-gray-light">{{ toFixedFormat(formatedPerformance)}}</p>
       </div>
 
@@ -26,8 +26,8 @@
 </template>
 <script lang="ts">
 import { computed, defineComponent } from 'vue'
-import { IStatisticAbsentMeta, IStatisticPlacementMeta } from '../../types/InterfaceType'
-import { formatDateWithMonth, calculatePerformaceAbsent, toFixedFormat, currentMonthOnly } from '../../utils/helperFunction';
+import { IStatisticAbsentMeta, IStatisticPlacementMeta } from '@/types/InterfaceType'
+import { formatDateWithMonth, calculatePerformaceAbsent, toFixedFormat, currentMonthOnly } from '@/utils/helperFunction';
 
 export default defineComponent({
    props:{

@@ -56,25 +56,25 @@
                   <div class="flex flex-col mt-1 space-y-2">
                      <div class="flex flex-col">
                         <p class="text-sm text-color-gray-default dark:text-color-gray-default">Role</p>
-                        <p class="text-color-dark-gray-darker dark:text-color-gray-light">{{ currentUser.mainRole.roleName}}</p>
+                        <p class="text-color-dark-gray-darker dark:text-color-gray-light">{{ currentUserMainRole.roleName}}</p>
                      </div>
                      <div class="flex flex-col">
                         <p class="text-sm text-color-gray-default dark:text-color-gray-default">Role Descrition</p>
-                        <p class="text-color-dark-gray-darker dark:text-color-gray-light">{{ currentUser.mainRole.roleDescription }}</p>
+                        <p class="text-color-dark-gray-darker dark:text-color-gray-light">{{ currentUserMainRole.roleDescription }}</p>
                      </div>
                      <div class="flex flex-col">
                         <p class="text-sm text-color-gray-default dark:text-color-gray-default">Status</p>
                         <p class="text-color-dark-gray-darker dark:text-color-gray-light">
-                           <span class="p-1 text-xs dark:bg-[#71c5b0] bg-[#7cd1c6] font-semibold rounded text-color-gray-lightest dark:text-white shadow-lg">
-                              {{ currentUser.mainRole.isActive ? 'Active' : 'InActive' }}
+                           <span class="p-1 text-xs dark:bg-[#28a3a3] bg-[#54b3b3] font-semibold rounded text-color-gray-lightest dark:text-white shadow-lg">
+                              {{ currentUserMainRole.isActive ? 'Active' : 'InActive' }}
                            </span>
                         </p>
                      </div>
                   </div>
                   <img class="h-36 w-36 rounded-full border-color-dark-gray-lightest dark:border-color-gray-darkest shadow-sm border-2 dark:border-opacity-30" :src="currentUser.photoUrl" alt="profile-avatar" />
 
-                  <div class="absolute p-1 text-xs dark:bg-[#9a6fc3] bg-[#a87cd1] font-semibold -bottom-8 right-0 rounded text-color-gray-lightest dark:text-white shadow-lg">
-                     {{currentUser.roleDeveloper.roleDeveloperName }}
+                  <div class="absolute p-1 text-xs dark:bg-[#28a3a3] bg-[#54b3b3] font-semibold -bottom-8 right-0 rounded text-color-gray-lightest dark:text-white shadow-lg">
+                     {{currentUserMainRole.roleName }}
                   </div>
                   <Svg2 class="absolute top-[-3.25rem] -right-4 z-0"/>
                </div>
@@ -115,10 +115,10 @@
 
 <script lang="ts">
 import { computed, defineComponent, reactive, toRefs } from "vue";
-import Svg1 from "../components/svg/Svg1.vue";
-import Svg2 from "../components/svg/Svg2.vue";
-import Svg3 from "../components/svg/Svg3.vue";
-import { useUserStore } from "../services";
+import Svg1 from "@/components/svg/Svg1.vue";
+import Svg2 from "@/components/svg/Svg2.vue";
+import Svg3 from "@/components/svg/Svg3.vue";
+import { useUserStore } from "@/services";
 
 export default defineComponent({
   components: { Svg2, Svg3, Svg1 },
@@ -127,6 +127,8 @@ export default defineComponent({
 
      const state = reactive({
         currentUser: computed(() => userStore.currentUser),
+        currentUserMainRole: computed(() => userStore.currentUserMainRole),
+        currentUserDeveloperRole: computed(() => userStore.currentUserDeveloperRole),
         menuTabs:[
         {
           id: 1,

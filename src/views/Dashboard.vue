@@ -114,8 +114,8 @@
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, reactive, toRefs } from 'vue'
-import StatisticCard from '../components/cards/StatisticCard.vue'
-import { useStatisticStore, useUserStore } from '../services';
+import StatisticCard from '@/components/cards/StatisticCard.vue'
+import { useStatisticStore, useUserStore } from '@/services';
 
 export default defineComponent({
   components: { StatisticCard },
@@ -125,7 +125,7 @@ export default defineComponent({
 
       const state = reactive({
          statistic: computed(()=> statisticStore.statistic),
-         client: computed(()=> userStore.getUserClient),
+         client: computed(()=> userStore.currentClient),
          currentYear: new Date().getFullYear(),
          uid: computed(()=> localStorage.getItem('_uid') as string)
       })

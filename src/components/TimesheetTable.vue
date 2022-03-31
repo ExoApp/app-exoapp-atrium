@@ -26,8 +26,8 @@
 <script lang="ts">
 import dayjs from 'dayjs';
 import {computed, defineComponent, onMounted, reactive, toRefs } from 'vue';
-import { useTimesheetStore, useUserStore, useUtilityStore } from '../services';
-import { isWeekend, currentMonthAndYear } from '../utils/helperFunction';
+import { useTimesheetStore, useUserStore, useUtilityStore } from '@/services';
+import { isWeekend, currentMonthAndYear } from '@/utils/helperFunction';
 import TimesheetCard from './cards/TimesheetCard.vue';
 
 export default defineComponent({
@@ -43,7 +43,7 @@ export default defineComponent({
       currentMonthExist: computed(()=> timesheetStore.currentMonthExist),
       isWeekend: computed(()=> isWeekend(new Date())),
       uid: computed(() => localStorage.getItem('_uid') as string),
-      client: computed(()=> userStore.getUserClient)
+      client: computed(()=> userStore.currentClient)
     })
 
     const generateTimesheet = () => {

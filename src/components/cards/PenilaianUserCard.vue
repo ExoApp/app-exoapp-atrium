@@ -17,7 +17,7 @@
          <p class="text-color-dark-gray-darker dark:text-color-gray-light"><span class="font-semibold">{{ nilai.kedisiplinan }}</span></p>
       </div>
       <div class="flex flex-col">
-         <p class="text-sm text-indigo-500 font-extrabold">Performance</p>
+         <p class="text-sm text-indigo-500 dark:text-indigo-400 font-extrabold">Performance</p>
          <p class="text-color-dark-gray-darker font-semibold dark:text-color-gray-light">{{ toFixedFormat(calculatedPercentage) }}</p>
       </div>
 
@@ -30,8 +30,8 @@
 </template>
 <script lang="ts">
 import { computed, defineComponent } from 'vue'
-import { IStatisticPenilaianUserMeta } from '../../types/InterfaceType'
-import { formatDateWithMonth, calculatePerformacePenilaianUser, toFixedFormat, currentMonthOnly  } from '../../utils/helperFunction';
+import { IStatisticPenilaianUserMeta } from '@/types/InterfaceType'
+import { formatDateWithMonth, calculatePerformacePenilaianUser, toFixedFormat, currentMonthOnly  } from '@/utils/helperFunction';
 
 export default defineComponent({
    props:{

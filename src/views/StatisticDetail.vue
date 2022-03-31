@@ -22,11 +22,7 @@
       </header>
       <header class="shadow p-4 mt-6 bg-white dark:bg-color-dark-gray-darker rounded-md flex flex-col justify-between max-w-screen-sm">
          <div class="text-lg inline-flex items-center space-x-1 text-color-dark-gray-darkest dark:text-color-gray-light font-normal">
-            <span v-if="category === '1'"> Absensi</span> 
-            <span v-else-if="category === '2'"> Placement Productivity</span> 
-            <span v-else-if="category === '3'"> Timesheet Colletion</span> 
-            <span v-else-if="category === '4'"> Penilaian User</span> 
-            <span v-else> Total Performance</span> 
+            <span> {{ defineTitle }} </span>
             <span>
                <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="h-5 w-5 text-color-gray-dark" viewBox="0 0 20 20" fill="currentColor">
                <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
@@ -50,8 +46,8 @@
             </div>
             <img class="h-36 w-36 rounded-full border-color-dark-gray-lightest dark:border-color-gray-darkest shadow-sm border-2 dark:border-opacity-30" :src="currentUser.photoUrl" alt="profile-avatar" />
             
-            <div class="absolute p-1 text-xs dark:bg-[#9a6fc3] bg-[#a87cd1] font-semibold -bottom-8 right-0 rounded text-color-gray-lightest dark:text-white shadow-lg">
-                {{currentUser.roleDeveloper.roleDeveloperName }}
+            <div :class="[currentUserDeveloperRole.roleDeveloperId == 7 ? 'dark:bg-[#28a3a3] bg-[#54b3b3]' : 'dark:bg-[#9a6fc3] bg-[#a87cd1]']" class="absolute p-1 text-xs font-semibold -bottom-8 right-0 rounded text-color-gray-lightest dark:text-white shadow-lg">
+                {{currentUserDeveloperRole.roleDeveloperName }}
             </div>
             
            <router-link to="/u/0/settings" class="z-10 absolute -top-8 -right-0">
@@ -128,14 +124,14 @@
 <script lang="ts">
 import { computed, defineComponent, onMounted, reactive, toRefs } from 'vue'
 import { useRoute } from 'vue-router';
-import AbsentCard from '../components/cards/AbsentCard.vue';
-import BlankStatistic from '../components/cards/BlankStatistic.vue';
-import CollectionTsCard from '../components/cards/CollectionTsCard.vue';
-import PenilaianUserCard from '../components/cards/PenilaianUserCard.vue';
-import ProjectCard from '../components/cards/ProjectCard.vue'
-import TotalPerformanceCard from '../components/cards/TotalPerformanceCard.vue';
-import Svg2 from '../components/svg/Svg2.vue';
-import { useStatisticStore, useUserStore, useUtilityStore } from '../services';
+import AbsentCard from '@/components/cards/AbsentCard.vue';
+import BlankStatistic from '@/components/cards/BlankStatistic.vue';
+import CollectionTsCard from '@/components/cards/CollectionTsCard.vue';
+import PenilaianUserCard from '@/components/cards/PenilaianUserCard.vue';
+import ProjectCard from '@/components/cards/ProjectCard.vue'
+import TotalPerformanceCard from '@/components/cards/TotalPerformanceCard.vue';
+import Svg2 from '@/components/svg/Svg2.vue';
+import { useStatisticStore, useUserStore, useUtilityStore } from '@/services';
 
 export default defineComponent({
   components: { ProjectCard, Svg2, AbsentCard, CollectionTsCard, PenilaianUserCard, TotalPerformanceCard, BlankStatistic},
@@ -150,6 +146,7 @@ export default defineComponent({
          category: computed(()=>route.params.category as string),
          uid: computed(() => localStorage.getItem('_uid') as string),
          currentUser: computed(() => userStore.currentUser),
+         currentUserDeveloperRole: computed(() => userStore.currentUserDeveloperRole),
          absenStatistics: computed(()=> statisticStore.absentStatistics),
          placementStatistics: computed(()=> statisticStore.placementStatistics),
          collectionStatistics: computed(()=> statisticStore.collectionStatistics),
@@ -162,8 +159,23 @@ export default defineComponent({
           statisticStore.onSnapshotRealtimeUpdateStatistic();
       })
 
+      const defineTitle = computed(() => {
+         switch (state.category) {
+            case "1":
+               return " Absensi"
+            case "2":
+               return " Placement Productivity"
+            case "3":
+               return " Timesheet Colletion"
+            case "4":
+               return " Penilaian User"
+            default:
+               return " Total Performance"
+         }})
+      
       return {
-         ...toRefs(state)
+         ...toRefs(state),
+         defineTitle
       }
    }
 })
